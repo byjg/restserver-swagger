@@ -26,6 +26,7 @@ class ServerHandler extends ServerRequestHandler
      * @param \Psr\SimpleCache\CacheInterface|null $cache
      * @throws \ByJG\RestServer\Swagger\SchemaNotFoundException
      * @throws \ByJG\RestServer\Swagger\SchemaInvalidException
+     * @throws \ByJG\RestServer\Swagger\OperationIdInvalidException
      */
     public function __construct($swaggerJson, CacheInterface $cache = null)
     {
@@ -38,34 +39,16 @@ class ServerHandler extends ServerRequestHandler
             throw new SchemaInvalidException("Schema '$swaggerJson' is invalid");
         }
 
-        $this->cache = $cache;
         if (is_null($cache)) {
-            $this->cache = new NoCacheEngine();
-        }
-    }
-
-    /**
-     * @param null $routePattern
-     * @param bool $outputBuffer
-     * @param bool $session
-     * @throws \ByJG\RestServer\Exception\ClassNotFoundException
-     * @throws \ByJG\RestServer\Exception\Error404Exception
-     * @throws \ByJG\RestServer\Exception\Error405Exception
-     * @throws \ByJG\RestServer\Exception\Error520Exception
-     * @throws \ByJG\RestServer\Exception\InvalidClassException
-     * @throws \ByJG\RestServer\Swagger\OperationIdInvalidException
-     */
-    public function handle($routePattern = null, $outputBuffer = true, $session = true)
-    {
-        if (is_null($routePattern)) {
-            $routePattern = $this->cache->get('SERVERHANDLERROUTES', false);
-            if ($routePattern === false) {
-                $routePattern = $this->generateRoutes();
-                $this->cache->set('SERVERHANDLERROUTES', $routePattern);
-            }
+            $cache = new NoCacheEngine();
         }
 
-        parent::handle($routePattern, $outputBuffer, $session);
+        $routePattern = $cache->get('SERVERHANDLERROUTES', false);
+        if ($routePattern === false) {
+            $routePattern = $this->generateRoutes();
+            $cache->set('SERVERHANDLERROUTES', $routePattern);
+        }
+        $this->setRoutes($routePattern);
     }
 
     /**
