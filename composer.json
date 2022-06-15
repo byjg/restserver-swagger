@@ -1,12 +1,6 @@
 {
   "name": "byjg/restserver-swagger",
   "description": "Enable to create RESTFull services with strong model schema. The routes are automatically created from a swagger.json file.",
-  "authors": [
-    {
-      "name": "João Gilberto Magalhães",
-      "email": "joao@byjg.com.br"
-    }
-  ],
   "autoload": {
     "psr-4": {
       "ByJG\\RestServer\\Swagger\\": "src/"
